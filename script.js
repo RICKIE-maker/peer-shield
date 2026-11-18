@@ -1,52 +1,29 @@
 
-// PEER SHIELD - Interactive Features
-
-// Mobile navigation
-const menuBtn = document.getElementById("menuBtn");
-const navigation = document.getElementById("navigation");
-
-menuBtn.addEventListener("click", () => {
-  navigation.classList.toggle("active");
-});
-
-// Close menu after selecting a link
-document.querySelectorAll("#navigation a").forEach(link => {
-  link.addEventListener("click", () => {
-    navigation.classList.remove("active");
-  });
-});
-
-// Quiz questions
 const questions = [
   {
-    question: "Can peer pressure influence a person's decisions?",
-    answers: ["Yes", "No"],
-    correct: 0,
-    explanation: "Correct! Peer pressure can influence behaviour and decisions."
-  },
-  {
-    question: "Is nicotine addictive?",
-    answers: ["Yes", "No"],
-    correct: 0,
-    explanation: "Correct! Nicotine is an addictive substance."
+    question: "Does peer pressure always have to be negative?",
+    answer: false,
+    explanation: "Peer pressure can be positive or negative. What matters is the influence."
   },
   {
     question: "Is asking for help a sign of weakness?",
-    answers: ["Yes", "No"],
-    correct: 1,
-    explanation: "Correct! Seeking help shows courage and self-awareness."
+    answer: false,
+    explanation: "Asking for help is a sign of courage and self-awareness."
   },
   {
-    question: "Can substance misuse affect mental health?",
-    answers: ["Yes", "No"],
-    correct: 0,
-    explanation: "Correct! Substance misuse can affect mental wellbeing."
+    question: "Can substance abuse affect school performance?",
+    answer: true,
+    explanation: "Yes. It can affect concentration, memory and learning."
   },
   {
-    question: "Is walking away from harmful pressure acceptable?",
-    answers: ["Yes", "No"],
-    correct: 0,
-    explanation: "Correct! Protecting your wellbeing is important."
+    question: "Is it okay to say NO when friends pressure you?",
+    answer: true,
+    explanation: "Absolutely! You have the right to make your own decisions."
+  },
+  {
+    question: "Can someone recover from substance addiction?",
+    answer: true,
+    explanation: "Yes. With appropriate treatment and support, recovery is possible."
   }
 ];
 
@@ -55,24 +32,12 @@ let score = 0;
 let answered = false;
 
 function showQuestion() {
-  const q = questions[currentQuestion];
+  const question = questions[currentQuestion];
 
   document.getElementById("question").textContent =
-    `Question ${currentQuestion + 1}: ${q.question}`;
-
-  const answers = document.getElementById("answers");
-  answers.innerHTML = "";
-
-  q.answers.forEach((answer, index) => {
-    const button = document.createElement("button");
-    button.textContent = answer;
-    button.addEventListener("click", () => checkAnswer(index));
-    answers.appendChild(button);
-  });
+    question.question;
 
   document.getElementById("feedback").textContent = "";
-  document.getElementById("score").textContent =
-    `Score: ${score}/${questions.length}`;
 
   answered = false;
 }
@@ -82,85 +47,51 @@ function checkAnswer(choice) {
 
   answered = true;
 
-  const q = questions[currentQuestion];
-  const correct = choice === q.correct;
+  const question = questions[currentQuestion];
+  const feedback = document.getElementById("feedback");
 
-  if (correct) score++;
+  if (choice === question.answer) {
+    score++;
+    feedback.textContent = "Correct! " + question.explanation;
+  } else {
+    feedback.textContent = "Not quite. " + question.explanation;
+  }
 
-  document.getElementById("feedback").textContent =
-    (correct ? "✓ " : "✗ ") + q.explanation;
+  if (currentQuestion < questions.length - 1) {
+    feedback.textContent += " Tap Next Question to continue.";
+  } else {
+    feedback.textContent +=
+      " Quiz complete! Your score: " + score + "/" +
+      questions.length + ".";
+  }
 
-  document.querySelectorAll("#answers button").forEach(button => {
-    button.disabled = true;
-  });
+  updateNextButton();
+}
 
-  document.getElementById("score").textContent =
-    `Score: ${score}/${questions.length}`;
+function updateNextButton() {
+  let button = document.getElementById("next-question");
+
+  if (!button) {
+    button = document.createElement("button");
+    button.id = "next-question";
+    button.textContent = "Next Question";
+    button.onclick = nextQuestion;
+
+    document.getElementById("quiz-container")
+      .appendChild(button);
+  }
+
+  button.style.display = answered &&
+    currentQuestion < questions.length - 1
+    ? "inline-block" : "none";
 }
 
 function nextQuestion() {
-  if (!answered) {
-    document.getElementById("feedback").textContent =
-      "Please answer the question first.";
-    return;
-  }
+  if (!answered) return;
 
   currentQuestion++;
-
-  if (currentQuestion >= questions.length) {
-    document.getElementById("question").textContent =
-      "Quiz completed!";
-
-    document.getElementById("answers").innerHTML = "";
-
-    document.getElementById("feedback").textContent =
-      `You scored ${score} out of ${questions.length}. ${
-        score === questions.length
-          ? "Excellent work!"
-          : "Keep learning and try again!"
-      }`;
-
-    document.getElementById("score").textContent =
-      "Thank you for participating!";
-
-    const nextBtn = document.querySelector(
-      "#quiz > button.btn"
-    );
-
-    nextBtn.textContent = "RESTART QUIZ";
-    nextBtn.onclick = restartQuiz;
-    return;
-  }
-
   showQuestion();
+  updateNextButton();
 }
 
-function restartQuiz() {
-  currentQuestion = 0;
-  score = 0;
-
-  const nextBtn = document.querySelector(
-    "#quiz > button.btn"
-  );
-
-  nextBtn.textContent = "NEXT QUESTION";
-  nextBtn.onclick = nextQuestion;
-
-  showQuestion();
-}
-
-// Help form - prototype demonstration only
-document.getElementById("helpForm").addEventListener(
-  "submit",
-  function(event) {
-    event.preventDefault();
-
-    document.getElementById("formMessage").textContent =
-      "Thank you for reaching out. This demonstration does not send or store your message. Please contact a trusted support service for real assistance.";
-
-    this.reset();
-  }
-);
-
-// Start quiz
 showQuestion();
